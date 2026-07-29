@@ -1,63 +1,58 @@
 import { Component, Input } from '@angular/core'
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap'
-import { ICmdGroup, SSHProfileOption } from '../api'
-import { profileMatchesQuery } from '../sshScope'
+import { ICmdGroup } from '../api'
 
 @Component({
     template: `
+        <div class="modal-header">
+            <h4 class="modal-title">{{ group.name ? '编辑分组' : '新建分组' }}</h4>
+        </div>
         <div class="modal-body">
             <div class="form-group">
-                <label>Name</label>
-                <input class="form-control" type="text" autofocus [(ngModel)]="group.name">
-            </div>
-            <div class="form-group mt-3">
-                <label>SSH profiles</label>
-                <div class="form-text text-muted mb-2">Leave empty to show this group in every terminal tab.</div>
-                <input class="form-control mb-2" type="text" placeholder="Search SSH profiles" [(ngModel)]="sshProfileQuery">
-                <div class="list-group ssh-profile-list">
-                    <label class="list-group-item d-flex align-items-center" *ngFor="let profile of filteredProfiles">
-                        <input class="form-check-input me-2" type="checkbox" [checked]="isSelected(profile.id)" (change)="toggleProfile(profile.id)">
-                        <span class="me-auto">{{ profile.name }}</span>
-                        <small class="text-muted">{{ profile.description }}</small>
-                    </label>
-                    <div class="list-group-item text-muted" *ngIf="!filteredProfiles.length">No matching SSH profiles</div>
-                </div>
+                <label>分组名称</label>
+                <input class="form-control" type="text" autofocus placeholder="输入分组名" [(ngModel)]="group.name">
             </div>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-outline-primary" (click)="save()">Save</button>
-            <button class="btn btn-outline-danger" (click)="cancel()">Cancel</button>
+            <button class="btn btn-outline-secondary" (click)="cancel()">取消</button>
+            <button class="btn btn-primary" (click)="save()">保存</button>
         </div>
     `,
     styles: [`
-        .ssh-profile-list {
-            max-height: 220px;
-            overflow: auto;
+        .modal-header {
+            padding: 16px 20px 0;
+            border: 0;
+        }
+        .modal-title {
+            font-size: 17px;
+            font-weight: 650;
+        }
+        .modal-body {
+            padding: 16px 20px;
+        }
+        .modal-body label {
+            font-size: 12.5px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            opacity: 0.85;
+        }
+        .modal-footer {
+            padding: 12px 20px 16px;
+            border: 0;
+        }
+        .modal-footer .btn {
+            border-radius: 8px;
+            padding: 6px 18px;
+            font-weight: 500;
         }
     `],
 })
 export class EditGroupModalComponent {
     @Input() group: ICmdGroup
-    @Input() profiles: SSHProfileOption[] = []
-    sshProfileQuery: string = ''
 
     constructor (
         private modalInstance: NgbActiveModal,
     ) {
-    }
-
-    get filteredProfiles (): SSHProfileOption[] {
-        return this.profiles.filter(profile => profileMatchesQuery(profile, this.sshProfileQuery))
-    }
-
-    isSelected (profileId: string): boolean {
-        return (this.group.profileIds ?? []).includes(profileId)
-    }
-
-    toggleProfile (profileId: string) {
-        const ids = new Set(this.group.profileIds ?? [])
-        ids.has(profileId) ? ids.delete(profileId) : ids.add(profileId)
-        this.group.profileIds = Array.from(ids)
     }
 
     save () {

@@ -62,3 +62,9 @@ typings/
 /dist
 
 *.zip
+
+# Claude Code local files
+.claude/
+
+# Use yarn.lock, not npm
+package-lock.json

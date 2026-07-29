@@ -1,20 +1,20 @@
 {
-  "name": "tabby-quick-cmds",
-  "version": "1.2.2",
-  "description": "Quick commands manager for Tabby",
-  "homepage": "https://github.com/minyoad/tabby-quick-cmds",
+  "name": "tabby-quick-cmd-dock",
+  "version": "1.0.0",
+  "description": "A quick-command dock at the bottom of Tabby terminals — grouped one-click command buttons with colors, notes and run-confirmation. Tabby 终端底部的快捷命令坞。",
+  "homepage": "https://github.com/nange-Blog/quick-cmds-button",
   "keywords": [
-    "terminus-plugin",
     "tabby-plugin",
-    "quick-commands"
+    "quick-commands",
+    "command-dock",
+    "terminal",
+    "productivity"
   ],
   "main": "dist/index.js",
   "typings": "dist/index.d.ts",
   "scripts": {
     "build": "webpack --progress --color",
     "watch": "webpack --progress --color --watch",
-    "pub": "npm run pack:zip",
-    "pack:zip": "powershell Compress-Archive -Path dist,package.json,README.md,README_CN.md,LICENSE -DestinationPath tabby-quick-cmds-v$env:npm_package_version.zip -Force",
     "prepublishOnly": "npm run build"
   },
   "files": [
@@ -63,10 +63,10 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/minyoad/tabby-quick-cmds.git"
+    "url": "git+https://github.com/nange-Blog/quick-cmds-button.git"
   },
   "bugs": {
-    "url": "https://github.com/minyoad/tabby-quick-cmds/issues"
+    "url": "https://github.com/nange-Blog/quick-cmds-button/issues"
   },
   "engines": {
     "node": ">=14.0.0 <26.0.0"

@@ -1,34 +1,130 @@
-import { Component, HostListener, OnInit } from '@angular/core'
+import { Component } from '@angular/core'
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap'
-import { QuickCmds, SSHProfileOption } from '../api'
-import { profileMatchesQuery } from '../sshScope'
+import { QuickCmds } from '../api'
 
 @Component({
     template: require('./editCommandModal.component.pug'),
     styles: [`
-        .ssh-profile-list {
-            max-height: 220px;
-            overflow: auto;
+        .modal-header {
+            padding: 16px 20px 0;
+            border: 0;
+        }
+        .modal-title {
+            font-size: 17px;
+            font-weight: 650;
+        }
+        .modal-body {
+            padding: 16px 20px;
+        }
+        .modal-body .form-group {
+            margin-bottom: 16px;
+        }
+        .modal-body label {
+            font-size: 12.5px;
+            font-weight: 600;
+            margin-bottom: 5px;
+            opacity: 0.85;
+        }
+        .qc-cmd-text {
+            font-family: "Cascadia Code", "JetBrains Mono", Consolas, monospace;
+            font-size: 12.5px;
+            line-height: 1.5;
+            resize: vertical;
+        }
+        .form-line {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding: 10px 0;
+            border-top: 1px solid color-mix(in srgb, var(--bs-body-color) 10%, transparent);
+        }
+        .form-line .title {
+            font-size: 13px;
+            font-weight: 600;
+        }
+        .form-line .description {
+            font-size: 11px;
+            opacity: 0.65;
+            margin-top: 2px;
+        }
+        .modal-footer {
+            padding: 12px 20px 16px;
+            border: 0;
+        }
+        .modal-footer .btn {
+            border-radius: 8px;
+            padding: 6px 18px;
+            font-weight: 500;
+        }
+        .qc-color-swatches {
+            display: flex;
+            align-items: center;
+            gap: 9px;
+            flex-wrap: wrap;
+        }
+        .qc-swatch {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+            box-shadow: 0 0 0 1px color-mix(in srgb, var(--bs-body-color) 20%, transparent) inset;
+            transition: transform 120ms ease, box-shadow 120ms ease;
+        }
+        .qc-swatch:hover {
+            transform: scale(1.15);
+        }
+        .qc-swatch.selected {
+            box-shadow: 0 0 0 2px var(--bs-body-bg), 0 0 0 4px currentColor;
+        }
+        .qc-swatch.none {
+            position: relative;
+            background: transparent !important;
+            box-shadow: 0 0 0 1px color-mix(in srgb, var(--bs-body-color) 32%, transparent) inset;
+        }
+        .qc-swatch.none::after {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 2px;
+            right: 2px;
+            height: 2px;
+            background: var(--bs-danger, #e5534b);
+            transform: rotate(-45deg);
+        }
+        .qc-swatch.none.selected {
+            box-shadow: 0 0 0 2px var(--bs-body-bg), 0 0 0 4px var(--bs-primary, #3b82f6);
         }
     `],
 })
-export class EditCommandModalComponent implements OnInit {
+export class EditCommandModalComponent {
     allGroups: string[] = []
-    profiles: SSHProfileOption[] = []
     command: QuickCmds = undefined!
-    isCapturingShortcut: boolean = false
-    sshProfileQuery: string = ''
-    specialCommandsInfo: string = 'Special commands:<br> \\x<xx> for control characters, \\s<ms> for delays, ${parameterName} for parameters.'
-    sshEnabled: boolean = false
     private _groupSavedValue: string = ''
+
+    readonly colors = [
+        { name: '无', value: '' },
+        { name: '红', value: '#e5534b' },
+        { name: '橙', value: '#e0823d' },
+        { name: '黄', value: '#d9a441' },
+        { name: '绿', value: '#4caf7d' },
+        { name: '蓝', value: '#3b82f6' },
+        { name: '紫', value: '#8b5cf6' },
+        { name: '灰', value: '#6b7280' },
+    ]
 
     constructor (
         private modalInstance: NgbActiveModal,
     ) {
     }
 
-    ngOnInit () {
-        this.sshEnabled = (this.command?.profileIds?.length ?? 0) > 0
+    selectColor (value: string) {
+        this.command.color = value
+    }
+
+    isColorSelected (value: string): boolean {
+        return (this.command.color || '') === value
     }
 
     onGroupFocus () {
@@ -42,99 +138,7 @@ export class EditCommandModalComponent implements OnInit {
         }
     }
 
-    @HostListener('document:keydown', ['$event'])
-    onKeyDown(event: KeyboardEvent) {
-        if (this.isCapturingShortcut) {
-            event.preventDefault()
-            event.stopPropagation()
-            
-            // Handle ESC key to cancel capture without changes
-            if (event.key === 'Escape') {
-                this.isCapturingShortcut = false
-                return
-            }
-            
-            // Handle Delete or Backspace to clear the shortcut
-            if (event.key === 'Delete' || event.key === 'Backspace') {
-                this.command.shortcut = ''
-                this.isCapturingShortcut = false
-                return
-            }
-            
-            let shortcut = ''
-            const modifiers: string[] = []
-            
-            if (event.ctrlKey || event.metaKey) {
-                modifiers.push('Ctrl')
-            }
-            if (event.altKey) {
-                modifiers.push('Alt')
-            }
-            if (event.shiftKey) {
-                modifiers.push('Shift')
-            }
-            
-            // Sort modifiers to ensure consistent ordering
-            modifiers.sort()
-            
-            // Add modifiers to shortcut string
-            if (modifiers.length > 0) {
-                shortcut = modifiers.join('+') + '+'
-            }
-            
-            // Add the main key
-            const mainKey = event.key
-            
-            // Only process if we have a valid main key (not just modifiers)
-            if (mainKey && !['Control', 'Alt', 'Shift', 'Meta'].includes(mainKey)) {
-                let processedKey = mainKey
-                
-                // Handle special cases for keys that need consistent naming
-                if (mainKey.length === 1) {
-                    // For single character keys, use uppercase
-                    processedKey = mainKey.toUpperCase()
-                } else {
-                    // For special keys (like ArrowUp), use camelCase with first letter uppercase
-                    processedKey = mainKey.charAt(0).toUpperCase() + mainKey.slice(1)
-                }
-                
-                shortcut += processedKey
-                this.command.shortcut = shortcut
-                this.isCapturingShortcut = false
-            }
-        }
-    }
-
-    startCaptureShortcut(event: Event) {
-        event.preventDefault()
-        this.isCapturingShortcut = true
-    }
-
-    get filteredProfiles (): SSHProfileOption[] {
-        return this.profiles.filter(profile => profileMatchesQuery(profile, this.sshProfileQuery))
-    }
-
-    isProfileSelected (profileId: string): boolean {
-        return (this.command.profileIds ?? []).includes(profileId)
-    }
-
-    toggleProfile (profileId: string) {
-        const ids = new Set(this.command.profileIds ?? [])
-        ids.has(profileId) ? ids.delete(profileId) : ids.add(profileId)
-        this.command.profileIds = Array.from(ids)
-    }
-
-    onSshToggle () {
-        if (!this.sshEnabled) {
-            this.command.profileIds = []
-        }
-    }
-
     save () {
-        if (!this.sshEnabled) {
-            this.command.profileIds = []
-        }
-        this.command.profileIds = this.command.profileIds ?? []
         this.modalInstance.close(this.command)
     }
 

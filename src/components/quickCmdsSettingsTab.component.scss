@@ -1,18 +1,34 @@
-.list-group-item {
-    position: relative;
-    padding-right: 100px; /* Add padding to prevent text from overlapping with buttons */
-}
+.qc-enable-toggle {
+    display: inline-flex;
+    align-items: center;
+    height: 30px;
+    padding: 0 14px;
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--bs-secondary-color);
+    background: color-mix(in srgb, var(--bs-body-color) 6%, transparent);
+    border: 1px solid color-mix(in srgb, var(--bs-body-color) 14%, transparent);
+    border-radius: 15px;
+    cursor: pointer;
+    transition: all 150ms ease;
 
-.command-buttons {
-    position: absolute;
-    top: 50%;
-    right: 10px;
-    transform: translateY(-50%);
-    display: flex;
-    gap: 5px; /* Add some space between the buttons */
-}
+    input {
+        width: 15px;
+        height: 15px;
+        margin: 0;
+        accent-color: var(--bs-primary);
+        cursor: pointer;
+    }
 
-.ssh-profile-list {
-    max-height: 220px;
-    overflow: auto;
+    &:hover {
+        color: var(--bs-primary);
+        border-color: color-mix(in srgb, var(--bs-primary) 34%, transparent);
+        background: color-mix(in srgb, var(--bs-primary) 8%, transparent);
+    }
+
+    &:has(input:checked) {
+        color: var(--bs-primary);
+        border-color: color-mix(in srgb, var(--bs-primary) 42%, transparent);
+        background: color-mix(in srgb, var(--bs-primary) 12%, transparent);
+    }
 }

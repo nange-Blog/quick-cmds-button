@@ -1,38 +1,7 @@
 h3 Quick Commands
 
 .form-group
-    button.btn.btn-sm.btn-outline-primary.mb-2((click)='createCommand()')
-        i.fa.fa-fw.fa-globe
-        span.ml-2 Add command
-    input.form-control.quickCmd(
-        type='text',
-        [(ngModel)]='quickCmd',
-        autofocus,
-        placeholder='enter to filter',
-        (ngModelChange)='refresh()',
-        (keyup.esc)='cancelFilter()'
-    )
-.list-group.mt-3.mb-3
-    ng-container(*ngFor='let group of childGroups') 
-        .list-group-item.list-group-item-action.d-flex.align-items-center((click)='groupCollapsed[group.name] = !groupCollapsed[group.name]')
-            .fa.fa-fw.fa-chevron-right(*ngIf='groupCollapsed[group.name]')
-            .fa.fa-fw.fa-chevron-down(*ngIf='!groupCollapsed[group.name]')
-            span.ml-3.mr-auto {{group.name || "Ungrouped"}}
-            .command-buttons
-                button.btn.btn-sm.btn-outline-info((click)='editGroup(group); $event.stopPropagation()')
-                    i.fa.fa-pencil
-                button.btn.btn-sm.btn-outline-danger((click)='deleteGroup(group); $event.stopPropagation()')
-                    i.fa.fa-trash-can
-        ng-container(*ngIf='!groupCollapsed[group.name]')
-            .list-group-item.pl-5.d-flex.align-items-start(*ngFor='let cmd of group.cmds') 
-                .mr-auto
-                    div {{cmd.name}}
-                    .text-muted
-                        span {{cmd.text}}
-                        span.ml-1(*ngIf='cmd.appendCR', title='Appends CR') ↵
-                        span.badge.bg-secondary.ml-2(*ngIf='cmd.profileIds?.length') SSH
-                .command-buttons
-                    button.btn.btn-outline-info((click)='editCommand(cmd)')
-                        i.fa.fa-pencil
-                    button.btn.btn-outline-danger((click)='deleteCommand(cmd)')
-                        i.fa.fa-trash-can
+    label.qc-enable-toggle.mb-0(title='Enable or disable the Quick Commands terminal bar')
+        input(type='checkbox', [checked]='config.store.qc.enabled !== false', (change)='toggleEnabled($event)')
+        span.ml-2 启用快速命令
+    p.text-muted.mt-3.mb-0 启用后，请在终端窗口底部的快捷命令栏进行分组与命令的添加、编辑和删除。

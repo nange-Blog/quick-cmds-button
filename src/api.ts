@@ -4,22 +4,13 @@ export interface QuickCmds {
     appendCR: boolean
     group?: string
     shortcut?: string
-    profileIds?: string[]
+    note?: string
+    color?: string
+    confirmBeforeRun?: boolean
 }
 
 export interface ICmdGroup {
     name: string
     cmds: QuickCmds[]
-    profileIds?: string[]
-}
-
-export interface QuickCmdsGroupScope {
-    name: string
-    profileIds?: string[]
-}
-
-export interface SSHProfileOption {
-    id: string
-    name: string
-    description: string
+    defaultVisible?: boolean
 }

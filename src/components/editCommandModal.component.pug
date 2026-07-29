@@ -1,94 +1,75 @@
+.modal-header
+    h4.modal-title {{ command.name ? '编辑命令' : '新建命令' }}
+
 .modal-body
     .form-group
-        label Name
+        label 名称
         input.form-control(
-            type='text', 
-            placeholder="Name",
+            type='text',
+            placeholder='给命令起个名字',
             autofocus,
-            [(ngModel)]='command.name', 
+            [(ngModel)]='command.name',
         )
 
     .form-group
-        label Text
-        textarea.form-control(
-            rows=6,
-            style="white-space: pre-line",
-            placeholder="Text to be sent",
+        label 命令内容
+        textarea.form-control.qc-cmd-text(
+            rows=3,
+            style='white-space: pre-line',
+            placeholder='要发送到终端的命令',
             [(ngModel)]='command.text',
         )
-        .form-text.text-muted {{ specialCommandsInfo }}
 
     .form-group
-        label Group
+        label 分组
         input.form-control(
             type='text',
             list='groupList',
-            placeholder='Select or type a group name',
+            placeholder='选择或输入分组名',
             [(ngModel)]='command.group',
             (focus)='onGroupFocus()',
             (blur)='onGroupBlur()',
         )
         datalist#groupList
-            option([value]="") Ungrouped
-            option(*ngFor="let group of allGroups", [value]="group") {{ group }}
+            option([value]='') 未分组
+            option(*ngFor='let group of allGroups', [value]='group') {{ group }}
 
     .form-group
-        label Shortcut
-        .input-group
-            input.form-control(
-                type='text', 
-                placeholder='Click to capture shortcut',
-                [(ngModel)]='command.shortcut', 
-                (click)='startCaptureShortcut($event)',
-                (focus)='startCaptureShortcut($event)',
-                [disabled]='isCapturingShortcut',
+        label 备注
+        input.form-control(
+            type='text',
+            placeholder='可选，悬停按钮时显示',
+            [(ngModel)]='command.note',
+        )
+
+    .form-group
+        label 颜色
+        .qc-color-swatches
+            span.qc-swatch(
+                *ngFor='let c of colors',
+                [class.selected]='isColorSelected(c.value)',
+                [class.none]='!c.value',
+                [style.background]='c.value || "transparent"',
+                [title]='c.name',
+                (click)='selectColor(c.value)',
             )
-            .input-group-append
-                button.btn.btn-outline-secondary(
-                    type='button',
-                    (click)='startCaptureShortcut($event)',
-                    [class.btn-outline-primary]='isCapturingShortcut',
-                )
-                    if isCapturingShortcut
-                        | Capturing...
-                    else
-                        | Capture
 
     .form-line
         .header
-            .title Append '\n'
-            .description Automatically append a '\n' char to the end
+            .title 执行前二次确认
+            .description 开启后点击此命令会先弹出确认框，防止误触
+        toggle(
+            [(ngModel)]='command.confirmBeforeRun',
+        )
+
+    .form-line
+        .header
+            .title 自动回车
+            .description 发送后自动追加换行符执行
         toggle(
             [(ngModel)]='command.appendCR',
         )
 
-    .form-line
-        .header
-            .title Limit to SSH profiles
-            .description Only show this command in selected SSH terminal tabs
-        toggle(
-            [(ngModel)]='sshEnabled',
-            (ngModelChange)='onSshToggle()',
-        )
-
-    .form-group(*ngIf='sshEnabled')
-        label SSH profiles
-        input.form-control.mb-2(
-            type='text',
-            placeholder='Search SSH profiles',
-            [(ngModel)]='sshProfileQuery',
-        )
-        .list-group.ssh-profile-list
-            label.list-group-item.d-flex.align-items-center(*ngFor='let profile of filteredProfiles')
-                input.form-check-input.me-2(
-                    type='checkbox',
-                    [checked]='isProfileSelected(profile.id)',
-                    (change)='toggleProfile(profile.id)',
-                )
-                span.mr-auto {{ profile.name }}
-                small.text-muted {{ profile.description }}
-            .list-group-item.text-muted(*ngIf='!filteredProfiles.length') No matching SSH profiles
-                    
 .modal-footer
-    button.btn.btn-outline-primary((click)='save()') Save
-    button.btn.btn-outline-danger((click)='cancel()') Cancel
+    button.btn.btn-outline-secondary((click)='cancel()') 取消
+    button.btn.btn-primary((click)='save()') 保存

@@ -1,6 +1,23 @@
 # Changelog
 
-## [Unreleased]
+## [1.0.0] - 2026-07-29
+
+Relaunched as **tabby-quick-cmd-dock** — a quick-command dock at the bottom of Tabby terminals. Based on tabby-quick-cmds.
+
+### Added
+- Bottom command dock in every terminal tab with grouped, one-click command buttons
+- Group dropdown selector to switch the active group
+- In-place management from the dock: add/edit/delete groups and commands via dialogs
+- "Default group" flag per group
+- Per-command color (preset palette), note (custom hover tooltip), and run-confirmation
+- Auto-refocus terminal after running a command
+- Single enable/disable toggle in the settings page
+
+### Removed
+- Alt+Q quick-command popup (replaced by the always-visible dock)
+- SSH profile scoping
+- Special syntax: `\xNN` control chars, `\sNN` delays, `${param}` prompts
+- Toolbar button / keyboard icon
 
 ## [1.2.0] - 2026-05-10
 
