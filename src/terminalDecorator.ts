@@ -435,7 +435,8 @@ export class TerminalButtonDecorator extends TerminalDecorator {
         gearBtn.title = 'Manage groups'
         gearBtn.addEventListener('click', (event) => {
             event.stopPropagation()
-            this.openGroupMenu(gearBtn, activeGroupName)
+            const currentActive = this.resolveActiveGroup(allGroups)
+            this.openGroupMenu(gearBtn, currentActive)
         })
         bar.appendChild(gearBtn)
 
