@@ -8,11 +8,6 @@ export class QuickCmdsConfigProvider extends ConfigProvider {
             groups: [],
             activeGroup: null,
         },
-        hotkeys: {
-            'qc': [
-                'Alt-Q',
-            ],
-        },
     }
 
     platformDefaults = { }

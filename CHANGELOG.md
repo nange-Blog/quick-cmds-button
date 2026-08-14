@@ -1,5 +1,14 @@
 # Changelog
 
+## [1.1.1] - 2026-08-14
+
+### Fixed
+- Removed a leftover global `keydown` listener (registered in the capture phase) that intercepted every keystroke to match now-removed per-command shortcuts. It could swallow characters and break typing in terminal apps such as **vim's insert/edit mode**.
+
+### Removed
+- Obsolete `ButtonProvider` (per-command keyboard shortcut handling and toolbar button) — shortcuts were already dropped from the UI in the 1.0.0 relaunch.
+- Dead `Alt-Q` hotkey default in config.
+
 ## [1.0.0] - 2026-07-29
 
 Relaunched as **tabby-quick-cmd-dock** — a quick-command dock at the bottom of Tabby terminals. Based on tabby-quick-cmds.
