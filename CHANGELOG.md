@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.1.2] - 2026-08-17
+
+### Fixed
+- The dock bar shrank the terminal's usable height, which left the alternate buffer (full-screen apps such as vim, less, `kubectl edit`) with a stale render layout. The first full-screen app in a terminal then ghosted its bottom status line into the content on scroll. Fixed by forcing one genuine terminal resize the first time a terminal switches into the alternate buffer — once per terminal, with no churn on later full-screen apps.
+
 ## [1.1.1] - 2026-08-14
 
 ### Fixed

@@ -292,6 +292,8 @@ function injectStyles (): void {
 export class TerminalButtonDecorator extends TerminalDecorator {
     private bars = new WeakMap<BaseTerminalTabComponent, HTMLElement>()
     private signatures = new WeakMap<BaseTerminalTabComponent, string>()
+    private altHooked = new WeakSet<BaseTerminalTabComponent>()
+    private altBufferSubs = new WeakMap<BaseTerminalTabComponent, { dispose: () => void }>()
     private tooltipTimer: any = null
 
     constructor (
@@ -314,6 +316,7 @@ export class TerminalButtonDecorator extends TerminalDecorator {
         }
 
         tryAttach()
+        this.hookAltBufferFix(terminal)
 
         const readySub = this.config.ready$.subscribe(() => tryAttach())
         this.subscribeUntilDetached(terminal, readySub)
@@ -331,7 +334,76 @@ export class TerminalButtonDecorator extends TerminalDecorator {
     detach (terminal: BaseTerminalTabComponent): void {
         this.removeBar(terminal)
         this.signatures.delete(terminal)
+        this.altBufferSubs.get(terminal)?.dispose()
+        this.altBufferSubs.delete(terminal)
+        this.altHooked.delete(terminal)
         super.detach(terminal)
+    }
+
+    // The dock bar shrinks the terminal tab's usable height. Everything stays
+    // size-consistent (xterm rows == PTY rows == visible rows), yet the FIRST time a
+    // full-screen app (vim, less, `kubectl edit`) switches xterm to its alternate
+    // buffer, its bottom status line ghosts into the content on scroll. Diagnostics
+    // proved this is not a sizing mismatch and not a plain repaint bug: forcing
+    // xterm.refresh() does nothing, but a genuine resize clears it permanently — the
+    // alternate buffer's render layout is left stale by the bar-induced shrink at
+    // startup and only a real resize re-lays it out. Crucially it stays fixed after
+    // that one resize (subsequent full-screen apps in the same terminal are fine), so
+    // we only need to act ONCE per terminal: on its first switch into the alternate
+    // buffer, force a single genuine resize (shrink a row, then fit back — a real
+    // change, not the no-op that re-fitting to the current size would be), fired twice
+    // to cover paint timing. Retries until xterm exists.
+    private hookAltBufferFix (terminal: BaseTerminalTabComponent, attempt = 0): void {
+        if (this.altHooked.has(terminal) || attempt > 10) {
+            return
+        }
+        const xterm: any = (terminal as any).frontend?.xterm
+        const onBufferChange: any = xterm?.buffer?.onBufferChange
+        if (!xterm || typeof onBufferChange !== 'function') {
+            setTimeout(() => this.hookAltBufferFix(terminal, attempt + 1), 200)
+            return
+        }
+        this.altHooked.add(terminal)
+        const disposable = xterm.buffer.onBufferChange((buf: any) => {
+            if (buf?.type !== 'alternate') {
+                return
+            }
+            // Only correct the ghost when the bar is actually shown — when the plugin
+            // is disabled there is no bar, no shrink, and thus nothing to fix.
+            if (!this.isEnabled() || !this.bars.has(terminal)) {
+                return
+            }
+            // One genuine resize permanently clears this terminal's stale layout, so
+            // fix on the first alternate-buffer entry only and then stop listening —
+            // no churn on every later vim/less/kubectl edit.
+            this.altBufferSubs.get(terminal)?.dispose()
+            this.altBufferSubs.delete(terminal)
+            requestAnimationFrame(() => this.forceRefit(terminal))
+            setTimeout(() => this.forceRefit(terminal), 120)
+        })
+        if (disposable?.dispose) {
+            this.altBufferSubs.set(terminal, disposable)
+        }
+    }
+
+    private forceRefit (terminal: BaseTerminalTabComponent): boolean {
+        const frontend: any = (terminal as any).frontend
+        const xterm: any = frontend?.xterm
+        const fitAddon: any = frontend?.fitAddon
+        if (!xterm?.element || typeof xterm.resize !== 'function' || typeof fitAddon?.fit !== 'function') {
+            return false
+        }
+        try {
+            if (xterm.rows > 1) {
+                // Genuine size change so the follow-up fit is not short-circuited.
+                xterm.resize(xterm.cols, xterm.rows - 1)
+            }
+            // Fit back to the real (bar-reduced) size; reflows both buffers + resizes PTY.
+            fitAddon.fit()
+            return true
+        } catch {
+            return false
+        }
     }
 
     private removeBar (terminal: BaseTerminalTabComponent): void {

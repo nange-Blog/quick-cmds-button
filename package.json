@@ -1,6 +1,6 @@
 {
   "name": "tabby-quick-cmd-dock",
-  "version": "1.1.1",
+  "version": "1.1.2",
   "description": "A quick-command dock at the bottom of Tabby terminals — grouped one-click command buttons with colors, notes and run-confirmation. Tabby 终端底部的快捷命令坞。",
   "homepage": "https://github.com/nange-Blog/quick-cmds-button",
   "keywords": [
