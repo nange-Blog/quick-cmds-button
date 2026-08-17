@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.1.3] - 2026-08-17
+
+### Changed
+- Set package author to `zhangnan666` (was `minyoad`, leftover from the original fork).
+
 ## [1.1.2] - 2026-08-17
 
 ### Fixed
