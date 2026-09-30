@@ -1,5 +1,10 @@
 # Changelog
 
+## [1.1.4] - 2026-09-30
+
+### Fixed
+- Pasting into the "命令内容" textarea of the add/edit command dialog also pasted the clipboard into the terminal behind it. Tabby's global paste hotkey only guards against focused `<input>` elements, not `<textarea>`, and the terminal tab keeps `hasFocus` while a modal is open. Both dialogs now disable Tabby's global hotkeys while open (same approach as Tabby's own hotkey-input modal) and re-enable them on close.
+
 ## [1.1.3] - 2026-08-17
 
 ### Changed

@@ -1,5 +1,6 @@
-import { Component, Input } from '@angular/core'
+import { Component, Input, OnDestroy, OnInit } from '@angular/core'
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap'
+import { HotkeysService } from 'tabby-core'
 import { ICmdGroup } from '../api'
 
 @Component({
@@ -47,12 +48,24 @@ import { ICmdGroup } from '../api'
         }
     `],
 })
-export class EditGroupModalComponent {
+export class EditGroupModalComponent implements OnInit, OnDestroy {
     @Input() group: ICmdGroup
 
     constructor (
         private modalInstance: NgbActiveModal,
+        private hotkeys: HotkeysService,
     ) {
+    }
+
+    // While the modal is open, Tabby's global hotkeys (e.g. Cmd/Ctrl-V → terminal
+    // paste) must not fire, otherwise pasting into the input also pastes into
+    // the terminal behind the modal.
+    ngOnInit () {
+        this.hotkeys.disable()
+    }
+
+    ngOnDestroy () {
+        this.hotkeys.enable()
     }
 
     save () {

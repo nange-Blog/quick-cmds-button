@@ -1,5 +1,6 @@
-import { Component } from '@angular/core'
+import { Component, OnDestroy, OnInit } from '@angular/core'
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap'
+import { HotkeysService } from 'tabby-core'
 import { QuickCmds } from '../api'
 
 @Component({
@@ -98,7 +99,7 @@ import { QuickCmds } from '../api'
         }
     `],
 })
-export class EditCommandModalComponent {
+export class EditCommandModalComponent implements OnInit, OnDestroy {
     allGroups: string[] = []
     command: QuickCmds = undefined!
     private _groupSavedValue: string = ''
@@ -116,7 +117,19 @@ export class EditCommandModalComponent {
 
     constructor (
         private modalInstance: NgbActiveModal,
+        private hotkeys: HotkeysService,
     ) {
+    }
+
+    // While the modal is open, Tabby's global hotkeys (e.g. Cmd/Ctrl-V → terminal
+    // paste) must not fire, otherwise pasting into the textarea also pastes into
+    // the terminal behind the modal.
+    ngOnInit () {
+        this.hotkeys.disable()
+    }
+
+    ngOnDestroy () {
+        this.hotkeys.enable()
     }
 
     selectColor (value: string) {
