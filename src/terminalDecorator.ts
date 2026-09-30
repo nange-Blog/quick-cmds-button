@@ -6,6 +6,7 @@ import { BaseTerminalTabComponent } from 'tabby-terminal'
 import { QuickCmds } from './api'
 import { EditCommandModalComponent } from './components/editCommandModal.component'
 import { EditGroupModalComponent } from './components/editGroupModal.component'
+import { I18nService } from './i18n'
 
 interface TerminalGroup {
     name: string
@@ -300,6 +301,7 @@ export class TerminalButtonDecorator extends TerminalDecorator {
         private config: ConfigService,
         private ngbModal: NgbModal,
         private zone: NgZone,
+        private i18n: I18nService,
     ) {
         super()
         injectStyles()
@@ -472,7 +474,7 @@ export class TerminalButtonDecorator extends TerminalDecorator {
         if (allGroups.length) {
             const groupBtn = document.createElement('button')
             groupBtn.className = 'qc-group-select'
-            groupBtn.title = 'Switch command group'
+            groupBtn.title = this.i18n.t('bar.switchGroup')
             const label = document.createElement('span')
             label.className = 'qc-group-label'
             const current = allGroups.find(g => g.name === activeGroupName) ?? allGroups[0]
@@ -504,7 +506,7 @@ export class TerminalButtonDecorator extends TerminalDecorator {
         const gearBtn = document.createElement('button')
         gearBtn.className = 'qc-icon-btn'
         gearBtn.innerHTML = ICON_GEAR
-        gearBtn.title = 'Manage groups'
+        gearBtn.title = this.i18n.t('bar.manageGroups')
         gearBtn.addEventListener('click', (event) => {
             event.stopPropagation()
             const currentActive = this.resolveActiveGroup(allGroups)
@@ -529,7 +531,7 @@ export class TerminalButtonDecorator extends TerminalDecorator {
         if (!group) {
             const empty = document.createElement('span')
             empty.className = 'qc-empty'
-            empty.textContent = '还没有分组，点击右侧齿轮添加分组'
+            empty.textContent = this.i18n.t('bar.empty')
             scroll.appendChild(empty)
             return
         }
@@ -562,8 +564,11 @@ export class TerminalButtonDecorator extends TerminalDecorator {
         // Trailing "add command" button
         const addBtn = document.createElement('button')
         addBtn.className = 'qc-terminal-btn qc-add-btn'
-        addBtn.innerHTML = `${ICON_PLUS}<span>命令</span>`
-        addBtn.addEventListener('mouseenter', () => this.scheduleTooltip(addBtn, '向当前分组添加命令'))
+        addBtn.innerHTML = ICON_PLUS
+        const addLabel = document.createElement('span')
+        addLabel.textContent = this.i18n.t('bar.addCommand')
+        addBtn.appendChild(addLabel)
+        addBtn.addEventListener('mouseenter', () => this.scheduleTooltip(addBtn, this.i18n.t('bar.addCommandTooltip')))
         addBtn.addEventListener('mouseleave', () => this.hideTooltip())
         addBtn.addEventListener('click', (event) => {
             event.stopPropagation()
@@ -574,10 +579,10 @@ export class TerminalButtonDecorator extends TerminalDecorator {
     }
 
     private computeSignature (groups: TerminalGroup[]): string {
-        // Structural data + enabled flag (NOT activeGroup) so switching groups in the
-        // dropdown does not trigger a rebuild.
+        // Structural data + enabled flag + UI language (NOT activeGroup) so switching
+        // groups in the dropdown does not trigger a rebuild, but a language change does.
         const enabled = this.isEnabled() ? 1 : 0
-        return enabled + '::' + groups
+        return enabled + ':' + this.i18n.locale + '::' + groups
             .map(g => `${g.name}|${g.defaultVisible ? 1 : 0}|${g.cmds.map(c => c.name + '\x00' + c.text + '\x00' + (c.color || '') + '\x00' + (c.note || '') + '\x00' + (c.confirmBeforeRun ? 1 : 0)).join('\x01')}`)
             .join('~~')
     }
@@ -608,7 +613,7 @@ export class TerminalButtonDecorator extends TerminalDecorator {
             const stored = storedGroups.find((g: any) => g.name === name)
             return {
                 name,
-                label: name || 'Ungrouped',
+                label: name || this.i18n.t('group.ungrouped'),
                 cmds: groupCmds,
                 defaultVisible: stored?.defaultVisible ?? false,
             }
@@ -687,8 +692,8 @@ export class TerminalButtonDecorator extends TerminalDecorator {
 
     private openCommandMenu (x: number, y: number, cmd: QuickCmds): void {
         this.showMenu(x, y, [
-            { label: '编辑命令', action: () => this.openEditCommand(cmd) },
-            { label: '删除命令', danger: true, action: () => this.deleteCommand(cmd) },
+            { label: this.i18n.t('menu.editCommand'), action: () => this.openEditCommand(cmd) },
+            { label: this.i18n.t('menu.deleteCommand'), danger: true, action: () => this.deleteCommand(cmd) },
         ])
     }
 
@@ -696,11 +701,11 @@ export class TerminalButtonDecorator extends TerminalDecorator {
         const rect = anchor.getBoundingClientRect()
         const hasGroup = activeGroupName !== null
         const items: MenuItem[] = [
-            { label: '添加分组', action: () => this.openAddGroup() },
+            { label: this.i18n.t('menu.addGroup'), action: () => this.openAddGroup() },
         ]
         if (hasGroup) {
-            items.push({ label: '编辑当前分组', action: () => this.openEditGroup(activeGroupName!) })
-            items.push({ label: '删除当前分组', danger: true, action: () => this.deleteGroup(activeGroupName!) })
+            items.push({ label: this.i18n.t('menu.editGroup'), action: () => this.openEditGroup(activeGroupName!) })
+            items.push({ label: this.i18n.t('menu.deleteGroup'), danger: true, action: () => this.deleteGroup(activeGroupName!) })
         }
         this.showMenu(rect.left, rect.bottom + 4, items)
     }
@@ -731,11 +736,14 @@ export class TerminalButtonDecorator extends TerminalDecorator {
 
     private openEditCommand (cmd: QuickCmds): void {
         this.zone.run(() => {
+            // The "ungrouped" pseudo-group is shown by its localized label; map it
+            // (and an emptied field) back to "no group" on save.
+            const ungroupedLabel = this.i18n.t('group.ungrouped')
             const modal = this.ngbModal.open(EditCommandModalComponent)
-            modal.componentInstance.command = { ...cmd, group: cmd.group || 'Ungrouped' }
+            modal.componentInstance.command = { ...cmd, group: cmd.group || ungroupedLabel }
             modal.componentInstance.allGroups = this.allGroupNames()
             modal.result.then((result: QuickCmds) => {
-                if (result.group === 'Ungrouped') {
+                if (!result.group || result.group === ungroupedLabel) {
                     result.group = null as any
                 }
                 Object.assign(cmd, result)
@@ -745,7 +753,7 @@ export class TerminalButtonDecorator extends TerminalDecorator {
     }
 
     private deleteCommand (cmd: QuickCmds): void {
-        if (!confirm(`删除命令 "${cmd.name || cmd.text}"？`)) {
+        if (!confirm(this.i18n.t('confirm.deleteCommand', { name: cmd.name || cmd.text }))) {
             return
         }
         this.config.store.qc.cmds = (this.config.store.qc.cmds ?? []).filter((c: QuickCmds) => c !== cmd)
@@ -807,7 +815,7 @@ export class TerminalButtonDecorator extends TerminalDecorator {
     }
 
     private deleteGroup (name: string): void {
-        if (!confirm(`删除分组 "${name}"？组内命令将变为未分组。`)) {
+        if (!confirm(this.i18n.t('confirm.deleteGroup', { name }))) {
             return
         }
         for (const cmd of (this.config.store.qc.cmds ?? []).filter((c: QuickCmds) => (c.group || '') === name)) {
@@ -828,7 +836,7 @@ export class TerminalButtonDecorator extends TerminalDecorator {
         }
 
         // Optional confirmation before running (per-command, default off)
-        if (cmd.confirmBeforeRun && !confirm(`执行 "${cmd.name || cmd.text}"？`)) {
+        if (cmd.confirmBeforeRun && !confirm(this.i18n.t('confirm.run', { name: cmd.name || cmd.text }))) {
             return
         }
 

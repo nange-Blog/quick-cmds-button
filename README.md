@@ -65,6 +65,20 @@ npm install
 npm run dev
 ```
 
+## 🌐 语言 / Language
+
+界面语言可在 **设置 → 快速命令 → 语言** 中切换（配置项 `qc.language`）：
+
+- **自动**（默认）：跟随 Tabby 的语言设置；若 Tabby 也设为“自动”，则跟随系统语言
+- **English / 简体中文 / Magyar**：强制本插件使用指定语言，与 Tabby 和系统语言无关
+
+UI language can be changed in **Settings → Quick Commands → Language** (config key `qc.language`):
+
+- **Automatic** (default): follows Tabby's language setting, or the system language when Tabby is on "Automatic". Unsupported languages fall back to English.
+- **English / 简体中文 / Magyar**: force this plugin's language, independent of Tabby's and the system's language.
+
+Translations live in [`src/i18n.ts`](./src/i18n.ts) — to add a language, add a dictionary there and an entry to `SUPPORTED_LANGUAGES`.
+
 ## ⚙️ 开发
 
 ```bash

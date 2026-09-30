@@ -1,75 +1,75 @@
 .modal-header
-    h4.modal-title {{ command.name ? '编辑命令' : '新建命令' }}
+    h4.modal-title {{ command.name ? t('command.editTitle') : t('command.newTitle') }}
 
 .modal-body
     .form-group
-        label 名称
+        label {{ t('command.name') }}
         input.form-control(
             type='text',
-            placeholder='给命令起个名字',
+            [placeholder]='t("command.namePlaceholder")',
             autofocus,
             [(ngModel)]='command.name',
         )
 
     .form-group
-        label 命令内容
+        label {{ t('command.text') }}
         textarea.form-control.qc-cmd-text(
             rows=3,
             style='white-space: pre-line',
-            placeholder='要发送到终端的命令',
+            [placeholder]='t("command.textPlaceholder")',
             [(ngModel)]='command.text',
         )
 
     .form-group
-        label 分组
+        label {{ t('command.group') }}
         input.form-control(
             type='text',
             list='groupList',
-            placeholder='选择或输入分组名',
+            [placeholder]='t("command.groupPlaceholder")',
             [(ngModel)]='command.group',
             (focus)='onGroupFocus()',
             (blur)='onGroupBlur()',
         )
         datalist#groupList
-            option([value]='') 未分组
+            option([value]='') {{ t('group.ungrouped') }}
             option(*ngFor='let group of allGroups', [value]='group') {{ group }}
 
     .form-group
-        label 备注
+        label {{ t('command.note') }}
         input.form-control(
             type='text',
-            placeholder='可选，悬停按钮时显示',
+            [placeholder]='t("command.notePlaceholder")',
             [(ngModel)]='command.note',
         )
 
     .form-group
-        label 颜色
+        label {{ t('command.color') }}
         .qc-color-swatches
             span.qc-swatch(
                 *ngFor='let c of colors',
                 [class.selected]='isColorSelected(c.value)',
                 [class.none]='!c.value',
                 [style.background]='c.value || "transparent"',
-                [title]='c.name',
+                [title]='t(c.key)',
                 (click)='selectColor(c.value)',
             )
 
     .form-line
         .header
-            .title 执行前二次确认
-            .description 开启后点击此命令会先弹出确认框，防止误触
+            .title {{ t('command.confirm') }}
+            .description {{ t('command.confirmHint') }}
         toggle(
             [(ngModel)]='command.confirmBeforeRun',
         )
 
     .form-line
         .header
-            .title 自动回车
-            .description 发送后自动追加换行符执行
+            .title {{ t('command.appendCR') }}
+            .description {{ t('command.appendCRHint') }}
         toggle(
             [(ngModel)]='command.appendCR',
         )
 
 .modal-footer
-    button.btn.btn-outline-secondary((click)='cancel()') 取消
-    button.btn.btn-primary((click)='save()') 保存
+    button.btn.btn-outline-secondary((click)='cancel()') {{ t('button.cancel') }}
+    button.btn.btn-primary((click)='save()') {{ t('button.save') }}
