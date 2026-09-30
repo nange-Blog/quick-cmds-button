@@ -12,6 +12,7 @@ import { QuickCmdsSettingsTabComponent } from './components/quickCmdsSettingsTab
 import { EditGroupModalComponent } from './components/editGroupModal.component'
 
 import { QuickCmdsConfigProvider } from './config'
+import { I18nService } from './i18n'
 import { QuickCmdsSettingsTabProvider } from './settings'
 import { TerminalButtonDecorator } from './terminalDecorator'
 
@@ -23,6 +24,7 @@ import { TerminalButtonDecorator } from './terminalDecorator'
         TabbyCoreModule,
     ],
     providers: [
+        I18nService,
         { provide: ConfigProvider, useClass: QuickCmdsConfigProvider, multi: true },
         { provide: SettingsTabProvider, useClass: QuickCmdsSettingsTabProvider, multi: true },
         { provide: TerminalDecorator, useClass: TerminalButtonDecorator, multi: true },

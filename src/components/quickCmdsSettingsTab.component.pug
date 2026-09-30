@@ -1,7 +1,18 @@
-h3 Quick Commands
+h3 {{ t('settings.title') }}
 
 .form-group
-    label.qc-enable-toggle.mb-0(title='Enable or disable the Quick Commands terminal bar')
+    label.qc-enable-toggle.mb-0([title]='t("settings.enableTitle")')
         input(type='checkbox', [checked]='config.store.qc.enabled !== false', (change)='toggleEnabled($event)')
-        span.ml-2 启用快速命令
-    p.text-muted.mt-3.mb-0 启用后，请在终端窗口底部的快捷命令栏进行分组与命令的添加、编辑和删除。
+        span.ml-2 {{ t('settings.enable') }}
+    p.text-muted.mt-3.mb-0 {{ t('settings.enableHint') }}
+
+.form-line.mt-4
+    .header
+        .title {{ t('settings.language') }}
+        .description {{ t('settings.languageHint') }}
+    select.form-control.qc-language-select(
+        [ngModel]='config.store.qc.language || "auto"',
+        (ngModelChange)='setLanguage($event)',
+    )
+        option(value='auto') {{ t('settings.languageAuto') }}
+        option(*ngFor='let lang of languages', [value]='lang.code') {{ lang.name }}

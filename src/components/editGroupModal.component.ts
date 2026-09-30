@@ -2,21 +2,22 @@ import { Component, Input, OnDestroy, OnInit } from '@angular/core'
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap'
 import { HotkeysService } from 'tabby-core'
 import { ICmdGroup } from '../api'
+import { I18nService } from '../i18n'
 
 @Component({
     template: `
         <div class="modal-header">
-            <h4 class="modal-title">{{ group.name ? '编辑分组' : '新建分组' }}</h4>
+            <h4 class="modal-title">{{ group.name ? t('group.editTitle') : t('group.newTitle') }}</h4>
         </div>
         <div class="modal-body">
             <div class="form-group">
-                <label>分组名称</label>
-                <input class="form-control" type="text" autofocus placeholder="输入分组名" [(ngModel)]="group.name">
+                <label>{{ t('group.name') }}</label>
+                <input class="form-control" type="text" autofocus [placeholder]="t('group.namePlaceholder')" [(ngModel)]="group.name">
             </div>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-outline-secondary" (click)="cancel()">取消</button>
-            <button class="btn btn-primary" (click)="save()">保存</button>
+            <button class="btn btn-outline-secondary" (click)="cancel()">{{ t('button.cancel') }}</button>
+            <button class="btn btn-primary" (click)="save()">{{ t('button.save') }}</button>
         </div>
     `,
     styles: [`
@@ -54,7 +55,12 @@ export class EditGroupModalComponent implements OnInit, OnDestroy {
     constructor (
         private modalInstance: NgbActiveModal,
         private hotkeys: HotkeysService,
+        private i18n: I18nService,
     ) {
+    }
+
+    t (key: string, params?: Record<string, string>): string {
+        return this.i18n.t(key, params)
     }
 
     // While the modal is open, Tabby's global hotkeys (e.g. Cmd/Ctrl-V → terminal

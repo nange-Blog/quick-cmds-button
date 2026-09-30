@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core'
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap'
 import { HotkeysService } from 'tabby-core'
 import { QuickCmds } from '../api'
+import { I18nService } from '../i18n'
 
 @Component({
     template: require('./editCommandModal.component.pug'),
@@ -105,20 +106,25 @@ export class EditCommandModalComponent implements OnInit, OnDestroy {
     private _groupSavedValue: string = ''
 
     readonly colors = [
-        { name: '无', value: '' },
-        { name: '红', value: '#e5534b' },
-        { name: '橙', value: '#e0823d' },
-        { name: '黄', value: '#d9a441' },
-        { name: '绿', value: '#4caf7d' },
-        { name: '蓝', value: '#3b82f6' },
-        { name: '紫', value: '#8b5cf6' },
-        { name: '灰', value: '#6b7280' },
+        { key: 'color.none', value: '' },
+        { key: 'color.red', value: '#e5534b' },
+        { key: 'color.orange', value: '#e0823d' },
+        { key: 'color.yellow', value: '#d9a441' },
+        { key: 'color.green', value: '#4caf7d' },
+        { key: 'color.blue', value: '#3b82f6' },
+        { key: 'color.purple', value: '#8b5cf6' },
+        { key: 'color.gray', value: '#6b7280' },
     ]
 
     constructor (
         private modalInstance: NgbActiveModal,
         private hotkeys: HotkeysService,
+        private i18n: I18nService,
     ) {
+    }
+
+    t (key: string, params?: Record<string, string>): string {
+        return this.i18n.t(key, params)
     }
 
     // While the modal is open, Tabby's global hotkeys (e.g. Cmd/Ctrl-V → terminal

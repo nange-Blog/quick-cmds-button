@@ -1,5 +1,17 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+- **Localization.** All UI strings (dock bar, menus, dialogs, confirmations, settings tab) now go through a small built-in i18n layer. Shipped languages: English, 简体中文 (Simplified Chinese), Magyar (Hungarian).
+- **Language setting** (Settings → Quick Commands → Language, config key `qc.language`):
+  - `auto` (default) — follow Tabby's own language setting; when Tabby is on "Automatic", follow the system language. Languages the plugin doesn't ship fall back to English.
+  - `en` / `zh-CN` / `hu` — force a language for this plugin, independent of Tabby's and the system's language.
+- Changing the language applies immediately, no restart needed.
+
+### Changed
+- The default UI language is no longer hard-coded Chinese. Users whose Tabby / system language is Chinese see no change; everyone else gets English (or Hungarian) instead of Chinese.
+
 ## [1.1.4] - 2026-09-30
 
 ### Fixed
