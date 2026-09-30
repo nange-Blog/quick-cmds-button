@@ -317,6 +317,7 @@ export class TerminalButtonDecorator extends TerminalDecorator {
 
         tryAttach()
         this.hookAltBufferFix(terminal)
+        this.syncPtySize(terminal)
 
         const readySub = this.config.ready$.subscribe(() => tryAttach())
         this.subscribeUntilDetached(terminal, readySub)
@@ -384,6 +385,35 @@ export class TerminalButtonDecorator extends TerminalDecorator {
         if (disposable?.dispose) {
             this.altBufferSubs.set(terminal, disposable)
         }
+    }
+
+    // Decorators are attached right after the frontend's first fit, and the local
+    // shell is spawned with that pre-dock size. Adding the bar then shrinks xterm
+    // (e.g. 61 -> 58 rows), but Tabby only forwards the resize to the session if it
+    // is already open, so the PTY can keep the stale, larger size until the window
+    // is resized by hand. TUIs (vim, htop, CLI agents...) then draw their bottom
+    // lines under the bar. Push xterm's real size to the session whenever a session
+    // (re)appears and once more after layout settles.
+    private syncPtySize (terminal: BaseTerminalTabComponent): void {
+        const push = () => {
+            const xterm: any = (terminal as any).frontend?.xterm
+            const session: any = (terminal as any).session
+            if (!xterm || !session?.open || typeof session.resize !== 'function') {
+                return
+            }
+            session.resize(xterm.cols, xterm.rows)
+        }
+        const schedule = () => {
+            requestAnimationFrame(push)
+            for (const delay of [250, 1000, 2500]) {
+                setTimeout(push, delay)
+            }
+        }
+        const sessionChanged$: any = (terminal as any).sessionChanged$
+        if (sessionChanged$?.subscribe) {
+            this.subscribeUntilDetached(terminal, sessionChanged$.subscribe(() => schedule()))
+        }
+        schedule()
     }
 
     private forceRefit (terminal: BaseTerminalTabComponent): boolean {
