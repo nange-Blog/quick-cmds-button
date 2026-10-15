@@ -2,6 +2,7 @@ import { Component, OnDestroy, OnInit } from '@angular/core'
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap'
 import { HotkeysService } from 'tabby-core'
 import { QuickCmds } from '../api'
+import { t } from '../i18n'
 
 @Component({
     template: require('./editCommandModal.component.pug'),
@@ -104,15 +105,17 @@ export class EditCommandModalComponent implements OnInit, OnDestroy {
     command: QuickCmds = undefined!
     private _groupSavedValue: string = ''
 
+    t = t
+
     readonly colors = [
-        { name: '无', value: '' },
-        { name: '红', value: '#e5534b' },
-        { name: '橙', value: '#e0823d' },
-        { name: '黄', value: '#d9a441' },
-        { name: '绿', value: '#4caf7d' },
-        { name: '蓝', value: '#3b82f6' },
-        { name: '紫', value: '#8b5cf6' },
-        { name: '灰', value: '#6b7280' },
+        { name: t('color.none'), value: '' },
+        { name: t('color.red'), value: '#e5534b' },
+        { name: t('color.orange'), value: '#e0823d' },
+        { name: t('color.yellow'), value: '#d9a441' },
+        { name: t('color.green'), value: '#4caf7d' },
+        { name: t('color.blue'), value: '#3b82f6' },
+        { name: t('color.purple'), value: '#8b5cf6' },
+        { name: t('color.gray'), value: '#6b7280' },
     ]
 
     constructor (

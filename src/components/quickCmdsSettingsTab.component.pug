@@ -3,5 +3,5 @@ h3 Quick Commands
 .form-group
     label.qc-enable-toggle.mb-0(title='Enable or disable the Quick Commands terminal bar')
         input(type='checkbox', [checked]='config.store.qc.enabled !== false', (change)='toggleEnabled($event)')
-        span.ml-2 启用快速命令
-    p.text-muted.mt-3.mb-0 启用后，请在终端窗口底部的快捷命令栏进行分组与命令的添加、编辑和删除。
+        span.ml-2 {{ t('settings.enable') }}
+    p.text-muted.mt-3.mb-0 {{ t('settings.enableDesc') }}

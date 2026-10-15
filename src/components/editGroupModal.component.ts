@@ -2,21 +2,22 @@ import { Component, Input, OnDestroy, OnInit } from '@angular/core'
 import { NgbActiveModal } from '@ng-bootstrap/ng-bootstrap'
 import { HotkeysService } from 'tabby-core'
 import { ICmdGroup } from '../api'
+import { t } from '../i18n'
 
 @Component({
     template: `
         <div class="modal-header">
-            <h4 class="modal-title">{{ group.name ? '编辑分组' : '新建分组' }}</h4>
+            <h4 class="modal-title">{{ group.name ? t('group.edit') : t('group.new') }}</h4>
         </div>
         <div class="modal-body">
             <div class="form-group">
-                <label>分组名称</label>
-                <input class="form-control" type="text" autofocus placeholder="输入分组名" [(ngModel)]="group.name">
+                <label>{{ t('group.name') }}</label>
+                <input class="form-control" type="text" autofocus [placeholder]="t('group.namePh')" [(ngModel)]="group.name">
             </div>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-outline-secondary" (click)="cancel()">取消</button>
-            <button class="btn btn-primary" (click)="save()">保存</button>
+            <button class="btn btn-outline-secondary" (click)="cancel()">{{ t('common.cancel') }}</button>
+            <button class="btn btn-primary" (click)="save()">{{ t('common.save') }}</button>
         </div>
     `,
     styles: [`
@@ -49,6 +50,7 @@ import { ICmdGroup } from '../api'
     `],
 })
 export class EditGroupModalComponent implements OnInit, OnDestroy {
+    t = t
     @Input() group: ICmdGroup
 
     constructor (

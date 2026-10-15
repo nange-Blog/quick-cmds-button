@@ -4,6 +4,7 @@ import { TerminalDecorator } from 'tabby-terminal'
 import { ConfigService } from 'tabby-core'
 import { BaseTerminalTabComponent } from 'tabby-terminal'
 import { QuickCmds } from './api'
+import { initI18n, t } from './i18n'
 import { EditCommandModalComponent } from './components/editCommandModal.component'
 import { EditGroupModalComponent } from './components/editGroupModal.component'
 
@@ -302,6 +303,7 @@ export class TerminalButtonDecorator extends TerminalDecorator {
         private zone: NgZone,
     ) {
         super()
+        initI18n(config)
         injectStyles()
     }
 
@@ -529,7 +531,7 @@ export class TerminalButtonDecorator extends TerminalDecorator {
         if (!group) {
             const empty = document.createElement('span')
             empty.className = 'qc-empty'
-            empty.textContent = '还没有分组，点击右侧齿轮添加分组'
+            empty.textContent = t('bar.empty')
             scroll.appendChild(empty)
             return
         }
@@ -562,8 +564,8 @@ export class TerminalButtonDecorator extends TerminalDecorator {
         // Trailing "add command" button
         const addBtn = document.createElement('button')
         addBtn.className = 'qc-terminal-btn qc-add-btn'
-        addBtn.innerHTML = `${ICON_PLUS}<span>命令</span>`
-        addBtn.addEventListener('mouseenter', () => this.scheduleTooltip(addBtn, '向当前分组添加命令'))
+        addBtn.innerHTML = `${ICON_PLUS}<span>${t('bar.addCmd')}</span>`
+        addBtn.addEventListener('mouseenter', () => this.scheduleTooltip(addBtn, t('bar.addCmdTip')))
         addBtn.addEventListener('mouseleave', () => this.hideTooltip())
         addBtn.addEventListener('click', (event) => {
             event.stopPropagation()
@@ -687,8 +689,8 @@ export class TerminalButtonDecorator extends TerminalDecorator {
 
     private openCommandMenu (x: number, y: number, cmd: QuickCmds): void {
         this.showMenu(x, y, [
-            { label: '编辑命令', action: () => this.openEditCommand(cmd) },
-            { label: '删除命令', danger: true, action: () => this.deleteCommand(cmd) },
+            { label: t('menu.editCmd'), action: () => this.openEditCommand(cmd) },
+            { label: t('menu.deleteCmd'), danger: true, action: () => this.deleteCommand(cmd) },
         ])
     }
 
@@ -696,11 +698,11 @@ export class TerminalButtonDecorator extends TerminalDecorator {
         const rect = anchor.getBoundingClientRect()
         const hasGroup = activeGroupName !== null
         const items: MenuItem[] = [
-            { label: '添加分组', action: () => this.openAddGroup() },
+            { label: t('menu.addGroup'), action: () => this.openAddGroup() },
         ]
         if (hasGroup) {
-            items.push({ label: '编辑当前分组', action: () => this.openEditGroup(activeGroupName!) })
-            items.push({ label: '删除当前分组', danger: true, action: () => this.deleteGroup(activeGroupName!) })
+            items.push({ label: t('menu.editGroup'), action: () => this.openEditGroup(activeGroupName!) })
+            items.push({ label: t('menu.deleteGroup'), danger: true, action: () => this.deleteGroup(activeGroupName!) })
         }
         this.showMenu(rect.left, rect.bottom + 4, items)
     }
@@ -745,7 +747,7 @@ export class TerminalButtonDecorator extends TerminalDecorator {
     }
 
     private deleteCommand (cmd: QuickCmds): void {
-        if (!confirm(`删除命令 "${cmd.name || cmd.text}"？`)) {
+        if (!confirm(t('confirm.deleteCmd', cmd.name || cmd.text))) {
             return
         }
         this.config.store.qc.cmds = (this.config.store.qc.cmds ?? []).filter((c: QuickCmds) => c !== cmd)
@@ -807,7 +809,7 @@ export class TerminalButtonDecorator extends TerminalDecorator {
     }
 
     private deleteGroup (name: string): void {
-        if (!confirm(`删除分组 "${name}"？组内命令将变为未分组。`)) {
+        if (!confirm(t('confirm.deleteGroup', name))) {
             return
         }
         for (const cmd of (this.config.store.qc.cmds ?? []).filter((c: QuickCmds) => (c.group || '') === name)) {
@@ -828,7 +830,7 @@ export class TerminalButtonDecorator extends TerminalDecorator {
         }
 
         // Optional confirmation before running (per-command, default off)
-        if (cmd.confirmBeforeRun && !confirm(`执行 "${cmd.name || cmd.text}"？`)) {
+        if (cmd.confirmBeforeRun && !confirm(t('confirm.run', cmd.name || cmd.text))) {
             return
         }
 
